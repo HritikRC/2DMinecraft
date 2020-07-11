@@ -1,0 +1,609 @@
+<!--
+
+Created by Hritik RC
+Youtube : https://www.youtube.com/channel/UCcGIeUrE5IpTHk9S2R_l0uQ?view_as=subscriber
+
+Hope you enjoy this. It's still unfinished and there is a lot of work to be done.
+
+Controls:
+Use arrow keys to move, space to jump
+Click 'e' to toggle between inventory
+Click escape, or "e" to exit the inventory
+Click 'h' to toggle the hotbar, show and hide it using 'h'
+Use mouse to break blocks, but you have to be close to the block
+Use 'q' to place a block (make sure you are using a block and that you have 1 or more of that block)
+Also when you place a block, make sure you are close to where you want to place it
+
+I have 2 youtube videos, where I explain and show how I made it upto here with the program. Check them out:
+Part 1 : https://www.youtube.com/watch?v=BDdLcMoSje0&lc=Ugy14tX5TjtbtJggHdJ4AaABAg
+Part 2 : https://www.youtube.com/watch?v=8hEql-CHljU
+-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>2D Minecraft</title>
+	<script src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
+	<script src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/bmoren/p5.collide2D@0.6/p5.collide2d.js"></script>
+</head>
+<body>
+	<script src = "map.js"></script>
+	<script type="text/javascript">
+
+		var blocks = [];
+		var player;
+
+		function setup(){
+			createCanvas(510, 510);
+			for(var row = 0; row < state.length; row++){
+				for(var col = 0; col < state[row].length; col++){
+					var x = col * 50;
+					var y = row * 50;
+					if(state[row][col] == 1){
+						blocks.push(new Block(x + 5, y + 5, color(0, 200, 0), "soil"));
+					}
+					if(state[row][col] == 2){
+						blocks.push(new Block(x + 5, y + 5, color(60), "stone"));
+					}
+					if(state[row][col] == 3){
+						blocks.push(new Block(x + 5, y + 5, color(160, 82, 45), "wood"));
+					}
+					if(state[row][col] == 4){
+						blocks.push(new Block(x + 5, y + 5, color(0, 100, 0), "leaves"));
+					}
+					if(state[row][col] == 5){
+						blocks.push(new Block(x + 5, y + 5, color(100), "ironore"));
+					}
+				}
+			}
+			noCursor();
+			player = new Player(250, 250);
+		}
+
+		var inv = false;
+		var crafting = true;
+		var count = 0;
+		var count2 = 0;
+		var daytime = 0;
+		var nighttime = 0;
+		var g = 0;
+		var b = 0;
+		var dontDo = false;
+		function draw(){
+			background(0, g, b);
+
+			if(g < 255 && dontDo == false){
+				g = g + (255 / 1000);
+				b = b + (255 / 1000);
+			} else if(g > 255){
+				g = 255;
+				b = 255;
+			} else if(g < 0){
+				g = 0;
+				b = 0;
+			}
+			if(560 - daytime < 50){
+				g = g - (255 / 1000);
+				b = b - (255 / 1000);
+				dontDo = true;
+			}
+
+			fill(255, 255, 0);
+			ellipse(daytime - 25, 150, 50, 50);
+			if(daytime > 560){
+				nighttime = nighttime + 0.05;
+				if(nighttime > 560){
+					daytime = 0;
+					dontDo = false;
+				}
+			} else {
+				daytime = daytime + 0.05;
+			}
+			fill(255);
+			ellipse(nighttime - 26, 150, 50, 50);
+
+			player.display();
+
+			for(var i = 0; i < blocks.length; i++){
+				blocks[i].display();
+			}
+
+			if(inv == true){
+				fill(0);
+				stroke(255);
+				rect(100, 100, 302.5, 302.5);
+				fill(255);
+				textSize(35);
+				text("Inventory", 175, 140);
+				fill(100);
+				rect(120, 170, 100, 100);
+				fill(255);
+				textSize(20);
+				text("You", 150, 195);
+				fill(255, 0, 0);
+				stroke(0);
+				rect(150, 215, 40, 40);
+				fill(150);
+				rect(120, 285, 260, 100);
+				stroke(0);
+				for(var i = 0; i < 10; i++){
+					fill(255 / i, 255/(2 * i), i * 10);
+					rect(120 + (i * 26), 285, 26, 100);
+					fill(255);
+					text(i, 128 + (i * 26), 305);
+				}
+				fill(0, 200, 0);
+				rect(125, 325, 15, 15);
+				fill(60);
+				rect(151, 325, 15, 15);
+				fill(160, 82, 45)
+				rect(177, 325, 15, 15);
+				fill(0, 100, 0)
+				rect(203, 325, 15, 15);
+				// apple
+				fill(0, 0, 0);
+				rect(235, 320, 2, 5);
+				fill(255, 0, 0);
+				rect(229, 325, 15, 15);
+				// ironore
+				fill(100);
+				rect(255, 325, 15, 15);
+				fill(255, 140, 0);
+				for(var i = 0; i < 3; i++){
+					for(var j = 0; j < 3; j++){
+						rect(257 + (i * 4), 327 + (j * 4), 3, 3);
+					}
+				}
+				//
+				fill(0);
+				text(soil, 125, 370);
+				text(stone, 151, 370);
+				text(wood, 177, 370);
+				text(leaves, 203, 370);
+				text(apples, 229, 370);
+				text(ironore, 255, 370);
+				stroke(0);
+				// Crafting
+				stroke(255);
+				fill(200, 0, 0);
+				rect(230, 170, 150, 100);
+				fill(255);
+				text("Click to open", 248, 210);
+				text("your Inventory", 244, 235);
+				stroke(0);
+			} else if(crafting == true && inv == false){
+				stroke(255);
+				fill(0);
+				rect(50, 150, 410, 300);
+				fill(255, 0, 100);
+				rect(50, 150, 410, 50);
+				fill(255);
+				textSize(40);
+				text("Crafting", 180, 185);
+				fill(255);
+				for(var x = 0; x < 3; x++){
+					for(var y = 0; y < 3; y++){
+						stroke(0);
+						rect(50 + (x * 83), 201 + (y * 83), 83, 83);
+					}
+				}
+			} else {
+				player.move();
+			}
+
+			if(showHotBar == true){
+				fill(255);
+				stroke(0);
+				rect(25, 25, 450, 50);
+				for(var i = 0; i < 10; i++){
+					if(blockChosen == i){
+						fill(255, 255, 255);
+					} else {
+						fill(255, 150, 0);
+					}
+					rect(25 + (i * 45), 25, 45, 50);
+				}
+				stroke(0);
+				fill(0, 200, 0);
+				rect(33, 35, 30, 30);
+				fill(60);
+				rect(33 + 45, 35, 30, 30);
+				fill(160, 82, 45);
+				rect(33 + 45 + 45, 35, 30, 30);
+				fill(0, 100, 0);
+				rect(33 + 45 + 45 + 45, 35, 30, 30);
+				// Apples
+				fill(0, 0, 0);
+				rect(228, 30, 2, 5);
+				fill(255, 0, 0);
+				rect(33 + 45 + 45 + 45 + 45, 35, 30, 30);
+				// Ironore
+				fill(100);
+				rect(33 + 45 + 45 + 45 + 45 + 45, 35, 30, 30);			
+				fill(255, 140, 0);
+				var x = 33 + 45 + 45 + 45 + 45 + 45;
+				for(var i = 0; i < 3; i++){
+					for(var j = 0; j < 3; j++){
+						rect(x + 5 + (i * 8), 40 + (j * 8), 5, 5);
+					}
+				}
+				//
+				fill(0);
+				for(var i = 0; i < 10; i++){
+					fill(0);
+					textSize(15);
+					text(i, 45 + (i * 45), 55);
+				}
+
+				// Hearts
+				for(var i = 0; i < hearts; i++){
+					fill(255, 0, 0);
+					ellipse(45 + (i * 20), 90, 10, 10);
+				}
+				// Hunger
+				for(var i = 0; i < hunger; i++){
+					fill(180, 102, 65);
+					ellipse(273 + (i * 20), 90, 10, 10);
+				}
+			}
+
+			fill(255, 0, 0);
+			stroke(0);
+			ellipse(mouseX, mouseY, 5, 5);
+
+			if(hearts > 10){
+				hearts = 10;
+			}
+
+			// Hunger Loss
+			count++;
+			if(count % 7000 == 0){
+				if(hunger != 0){
+					hunger--;
+				}
+				count = 1;
+			}
+			if(hunger == 0){
+				count2++;
+				if(count2 % 300 == 0){
+					hearts--;
+					count2 = 1;
+				}
+			}
+		}
+
+		document.onkeydown = function(evt) {
+		    evt = evt || window.event;
+		   	if(evt.code == "Escape"){
+		   		crafting = false;
+		   		inv = false;
+		   	}
+		};
+
+		var canJump = false;
+		var blockChosen = 0;
+		var showHotBar = true;
+		function keyPressed(){
+			if(inv == false){
+				if(key == " "){
+					if(canJump == true && blockAbove() == false){
+						player.ySpeed = -7.3;
+						canJump = false;
+					}
+				}
+				if(mouseX < 510 && mouseX > 0 && mouseY < 510 && mouseY > 0){
+					if(key == "q" || key == "Q"){
+						if(blockChosen == 4){
+							if(apples > 0 && (hearts != 10 || hunger != 10)){
+								if(hearts + 3 > 10){
+									hearts = 10;
+								} else {
+									hearts = hearts + 3;
+								}
+								if(hunger + 1 > 10){
+									hunger = 10;
+								} else {
+									hunger = hunger + 1;
+								}
+								apples--;
+							}
+						} else {
+							var xPos = 0;
+							var yPos = 0;
+							if(dist(player.x + 20, player.y + 20, mouseX, mouseY) < 100){
+								var xP = Math.floor((mouseX - 5) / 50);
+								var yP = Math.floor((mouseY - 5) / 50);
+								var x = 5 + (xP * 50);
+								var y = 5 + (yP * 50);
+								var blockThere = false;
+								var index = 0;
+								for(var i = 0; i < blocks.length; i++){
+									if(x == blocks[i].x && y == blocks[i].y){
+										blockThere = true;
+										index = i;
+										break;
+									}
+								}
+								if(collideRectRect(x, y, 50, 50, player.x, player.y, 40, 40) == false){
+									if(blockThere == false){
+										if(blockChosen == 0){
+											if(soil > 0){
+												blocks.push(new Block(x, y, color(0, 200, 0), "soil"));
+												soil--;
+											}
+										}
+										if(blockChosen == 1){
+											if(stone > 0){
+												blocks.push(new Block(x, y, color(60), "stone"));
+												stone--;
+											}
+										}
+										if(blockChosen == 2){
+											if(wood > 0){
+												blocks.push(new Block(x, y, color(160, 82, 45), "wood"));
+												wood--;
+											}
+										}
+										if(blockChosen == 3){
+											if(leaves > 0){
+												blocks.push(new Block(x, y, color(0, 100, 0), "leaves"));
+												leaves--;
+											}
+										}
+										if(blockChosen == 5){
+											if(ironore > 0){
+												blocks.push(new Block(x, y, color(100), "ironore"));
+												ironore--;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			if(key == "e"){
+				if(inv == true){
+					inv = false;
+				} else {
+					inv = true;
+				}
+			}
+			if(key == "h"){
+				if(showHotBar == true){
+					showHotBar = false;
+				} else {
+					showHotBar = true;
+				}
+			}
+			if("1234567890".includes(key)){
+				blockChosen = parseInt(key);
+			}
+		}
+
+		var soil = 0;
+		var stone = 0;
+		var wood = 0;
+		var leaves = 0;
+		var apples = 0;
+		var ironore = 0;
+
+		function mousePressed(){
+			if(mouseX < 510 && mouseX > 0 && mouseY < 510 && mouseY > 0){
+				if(inv == false){
+					var b = [];
+					for(var i = 0; i < blocks.length; i++){
+						if(blocks[i].hover == true && dist(blocks[i].x + 25, blocks[i].y + 25, player.x + 20, player.y + 20) < 100){
+							b.push(i);
+						}
+					}
+					if(b.length > 0){
+						b = b[0];
+						if(blocks[b].b == "soil" && soil < 9){
+							soil++;
+						}
+						if(blocks[b].b == "stone" && stone < 9){
+							stone++;
+						}
+						if(blocks[b].b == "wood" && wood < 9){
+							wood++;
+						}
+						if(blocks[b].b == "leaves" && leaves < 9){
+							leaves++;
+							if(blocks[b].hasApple == true && apples < 9){
+								apples++;
+							}
+						}
+						if(blocks[b].b == "ironore" && ironore < 9){
+							ironore++;
+						}
+						blocks.splice(b, 1);
+					}
+				}
+				if(inv == true){ // 230, 170, 150, 100
+					if(mouseX > 230 && mouseX < 380 && mouseY > 170 && mouseY < 270){
+						crafting = true;
+						inv = false;
+					}
+				}
+			}
+		}
+
+		function blockAbove(){
+			var isThereBlock = 0;
+			for(var i = 0; i < blocks.length; i++){
+				if(blocks[i].y + 50 <= player.y){
+					if(collideRectRect(blocks[i].x, blocks[i].y, 50, 50, player.x, player.y - 15, 40, 40)){
+						isThereBlock = 1;
+						console.log(blocks[i]);
+						break;
+					}
+				}
+			}
+			if(isThereBlock == 0){
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		var scene = 0;
+		var hearts = 10;
+		var hunger = 10;
+		function Player(x, y){
+			this.x = x;
+			this.y = y;
+			this.ySpeed = 0;
+			this.ySpeeds = [];
+
+			this.display = function(){
+				fill(255, 0, 0);
+				rect(this.x, this.y, 40, 40);
+			}
+
+			this.move = function(){
+				this.y = this.y + this.ySpeed;
+				this.ySpeed = this.ySpeed + 0.5;
+
+				var blockcount = 0;
+				for(var i = 0; i < blocks.length; i++){
+					if(collideRectRect(this.x, this.y, 40, 40, blocks[i].x, blocks[i].y, 50, 50)){
+						blockcount++;
+					}
+				}
+				if(blockcount == 0){
+					canJump = false;
+					this.ySpeeds.push(this.ySpeed);
+				}
+
+				for(var i = 0; i < blocks.length; i++){
+					if(collideRectRect(player.x, player.y, 40, 40, blocks[i].x, blocks[i].y, 50, 50)){
+						if(blocks[i].y < player.y + 40){
+							this.ySpeed = 0;
+							this.y = blocks[i].y - 40;
+							canJump = true;
+							if(this.ySpeeds[this.ySpeeds.length - 1] >= 14){
+								hearts = hearts - 1;
+								this.ySpeeds = [];
+							} else if(this.ySpeeds[this.ySpeeds.length - 1] >= 15){
+								hearts = hearts - 2;
+								this.ySpeeds = [];
+							} else if(this.ySpeeds[this.ySpeeds.length - 1] >= 17){
+								hearts = hearts - 3;
+								this.ySpeeds = [];
+							} else if(this.ySpeeds[this.ySpeeds.length - 1] >= 20){
+								hearts = hearts - 4;
+								this.ySpeeds = [];
+							} else if(this.ySpeeds[this.ySpeeds.length - 1] >= 24){
+								hearts = hearts - 5;
+								this.ySpeeds = [];
+							} else if(this.ySpeeds[this.ySpeeds.length - 1] >= 29){
+								hearts = hearts - 6;
+								this.ySpeeds = [];
+							} else if(this.ySpeeds[this.ySpeeds.length - 1] >= 35){
+								hearts = hearts - 7;
+								this.ySpeeds = [];
+							} else if(this.ySpeeds[this.ySpeeds.length - 1] >= 42){
+								hearts = hearts - 8;
+								this.ySpeeds = [];
+							} else if(this.ySpeeds[this.ySpeeds.length - 1] >= 50){
+								hearts = hearts - 9;
+								this.ySpeeds = [];
+							} else if(this.ySpeeds[this.ySpeeds.length - 1] >= 59){
+								hearts = hearts - 10;
+								this.ySpeeds = [];
+							} 
+							break;
+						}
+					}
+				}
+
+				if(keyIsDown(RIGHT_ARROW)){
+					this.x = this.x + 2;
+				} else if(keyIsDown(LEFT_ARROW)){
+					this.x = this.x - 2;
+				}
+
+				if(this.x > 500){
+					for(var i = 0; i < blocks.length; i++){
+						blocks[i].x = blocks[i].x - 500;
+						this.x = 0;
+					}
+				}
+				if(this.x + 40 < 0){
+					for(var i = 0; i < blocks.length; i++){
+						blocks[i].x = blocks[i].x + 500;
+						this.x = 460;
+					}
+				}
+				if(this.y > 500){
+					for(var i = 0; i < blocks.length; i++){
+						blocks[i].y = blocks[i].y - 500;
+						this.y = 0;
+					}
+				}
+				if(this.y + 40 < 0){
+					for(var i = 0; i < blocks.length; i++){
+						blocks[i].y = blocks[i].y + 500;
+						this.y = 460;
+					}
+				}
+
+				for(var i = 0; i < blocks.length; i++){
+					if(collideRectRect(player.x, player.y, 40, 40, blocks[i].x, blocks[i].y, 50, 50)){
+						if(blocks[i].y < player.y + 40){
+							if(blocks[i].x + 45 <= player.x){
+								player.x = player.x + 2;
+							}
+							if(blocks[i].x >= player.x + 35){
+								player.x = player.x - 2;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		function Block(x, y, c, b){ // Blocks - Grass, Leaves, Wood
+			this.x = x;
+			this.y = y;
+			this.c = c;
+			this.b = b;
+			this.hover = false;
+			this.isLeaves = (this.b == "leaves") ? true : false;
+			this.putAppleProbability = Math.random() * 100;
+			this.hasApple = false;
+
+			this.display = function(){
+				stroke(0);
+				fill(this.c);
+				rect(this.x, this.y, 50, 50);
+				if(this.b == "ironore"){
+					fill(255, 140, 0);
+					for(var i = 0; i < 3; i++){
+						for(var j = 0; j < 3; j++){
+							rect(this.x + 5 + (i * 15), this.y + 5 + (j * 15), 10, 10);
+						}
+					}
+				}
+				if(collideRectCircle(this.x, this.y, 50, 50, mouseX, mouseY, 5, 5)){
+					this.hover = true;
+				} else {
+					this.hover = false;
+				}
+				if(this.isLeaves == true && this.putAppleProbability > 70){
+					this.hasApple = true;
+					fill(0, 0, 0);
+					rect(this.x + 24, this.y + 10, 2, 5);
+					fill(255, 0, 0);
+					rect(this.x + 10, this.y + 15, 30, 30);
+				}
+			}
+		}
+
+	</script>
+</body>
+</html>
